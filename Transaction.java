@@ -16,5 +16,25 @@ public class Transaction {
     this.amount = amount;
     this.dateTime = LocalDateTime.now();
     this.balanceAfter = balanceAfter;
-}
+    }
+    
+    public String getId() {
+    return id;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public double getBalanceAfter() {
+        return balanceAfter;
+    }
 }
