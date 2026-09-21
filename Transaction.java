@@ -9,4 +9,12 @@ public class Transaction {
     private final double amount;
     private final LocalDateTime dateTime;
     private final double balanceAfter;
+
+    public Transaction(TransactionType type, double amount, double balanceAfter) {
+    this.id = UUID.randomUUID().toString();
+    this.type = type;
+    this.amount = amount;
+    this.dateTime = LocalDateTime.now();
+    this.balanceAfter = balanceAfter;
+}
 }
