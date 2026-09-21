@@ -1,0 +1,11 @@
+{
+  "code-runner.runInTerminal": true,
+  "code-runner.saveAllFilesBeforeRun": true,
+  "code-runner.ignoreSelection": true,
+  "code-runner.executorMap": {
+    "java": "cd \"$workspaceRoot\"; javac -d out *.java; if ($?) { java -cp out atm.Main }"
+  },
+  "files.exclude": {
+    "**/out": true
+  }
+}
