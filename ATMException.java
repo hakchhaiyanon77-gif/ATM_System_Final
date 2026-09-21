@@ -1,4 +1,3 @@
-package atm;
 
 public class ATMException extends Exception {
     private final String message;
