@@ -3,6 +3,7 @@ import java.util.Scanner;
 import java.util.NoSuchElementException;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.security.SecureRandom;
 
 public class ATM {
     private final HashMap<String, Account> accounts = new HashMap<>();
@@ -50,54 +51,32 @@ public class ATM {
     public void register() throws ATMException {
         System.out.println("\n--- Register Account ---");
 
-        String type = read("Type (1 Savings, 2 Checking): ");
-
-        if (!type.equals("1") && !type.equals("2")) {
-            throw new ATMException("Choose 1 or 2 for account type.");
+        System.out.println("1. Savings");
+        System.out.println("2. Checking");
+        String type;
+        while (true) {
+            type = read("Choose account type (1 or 2): ");
+            if (type.equals("1") || type.equals("2")) {
+                break;
+            }
+            System.out.println("Please type 1 for Savings or 2 for Checking, then press Enter.");
         }
 
-        String number = read("New account number (4-12 digits): ");
-
-        if (!number.matches("[0-9]{4,12}")) {
-            throw new ATMException(
-                    "Account number must have 4 to 12 digits.");
-        }
-
-        if (accounts.containsKey(number) || cards.containsKey(number)) {
-            throw new ATMException("This account number already exists.");
-        }
-
-        String pin = read("New 4-digit PIN: ");
-
-        if (!pin.matches("[0-9]{4}")) {
-            throw new InvalidPinException(
-                    "PIN must contain exactly 4 digits.");
-        }
-
-        String confirmPin = read("Confirm PIN: ");
-
-        if (!pin.equals(confirmPin)) {
-            throw new InvalidPinException("The PINs do not match.");
-        }
-
-        String balanceText = read("Opening balance: ");
-
-        if (!balanceText.matches("[0-9]{1,7}(\\.[0-9]{1,2})?")) {
-            throw new ATMException("Enter a balance like 100 or 100.50.");
-        }
-
-        double balance = Double.parseDouble(balanceText);
-        Account.validateMoney(balance, true);
-
-        Account account;
-
+        String name = read("Full name: ");
+        String phone = read("Phone number: ");
+        double openingBalance = 0;
         if (type.equals("1")) {
-            account = new SavingsAccount(
-                    number, pin, balance, 500, 0.01, 10);
-        } else {
-            account = new CheckingAccount(
-                    number, pin, balance, 1000, 200);
+            openingBalance = readAmount("Opening deposit (minimum $10): ");
         }
+        String number = generateAccountNumber();
+        String pin = String.valueOf(1000 + new SecureRandom().nextInt(9000));
+        Account account;
+        if (type.equals("1")) {
+            account = new SavingsAccount(number, pin, openingBalance, 500, 0.01, 10);
+        } else {
+            account = new CheckingAccount(number, pin, 0, 1000, 200);
+        }
+        account.setContactDetails(name, phone);
 
         Card card = new Card(number, account);
         accounts.put(number, account);
@@ -105,7 +84,31 @@ public class ATM {
 
         System.out.println("Account created successfully.");
         System.out.println("Your card/account number is: " + number);
+        System.out.println("Your generated PIN is: " + pin);
+        System.out.printf(Locale.US, "Account type: %s | Opening balance: $%.2f%n",
+                account.getAccountType(), account.getBalance());
+        System.out.println("Remember your PIN. You can change it after login.");
         System.out.println("You can now log in.");
+    }
+
+    private String generateAccountNumber() {
+        int number = 1003;
+        while (accounts.containsKey(String.valueOf(number))
+                || cards.containsKey(String.valueOf(number))) {
+            number++;
+        }
+        return String.valueOf(number);
+    }
+
+    public void showCard() throws ATMException {
+        requireLogin();
+        System.out.println("\n--- ATM Card ---");
+        System.out.println("Name: " + currentAccount.getOwnerName());
+        System.out.println("Phone: " + currentAccount.getPhoneNumber());
+        System.out.println("Card number: " + currentCard.getCardNumber());
+        System.out.println("Account number: " + currentAccount.getAccountNumber());
+        System.out.println("Account type: " + currentAccount.getAccountType());
+        System.out.println("Status: " + (currentCard.isLocked() ? "Locked" : "Active"));
     }
 
     public boolean login(String cardNumber, String pin) throws ATMException {
@@ -240,6 +243,7 @@ public class ATM {
                 + "\n5. History"
                 + "\n6. Change PIN"
                 + "\n7. Apply monthly savings interest"
+                + "\n8. Card details"
                 + "\n0. Logout");
     }
 
@@ -321,6 +325,10 @@ public class ATM {
 
                                     ((SavingsAccount) currentAccount).applyInterest();
                                     System.out.println("Monthly interest applied (1%).");
+                                    break;
+
+                                case "8":
+                                    showCard();
                                     break;
 
                                 case "0":

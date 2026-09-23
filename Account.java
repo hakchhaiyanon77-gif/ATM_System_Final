@@ -7,6 +7,8 @@ import java.util.List;
 
 public abstract class Account {
     private final String accountNumber;
+    private String ownerName = "Sample account";
+    private String phoneNumber = "Not provided";
     private String pin;
     private double balance;
     private final List<Transaction> transactions = new ArrayList<>();
@@ -30,6 +32,19 @@ public abstract class Account {
     }
 
     public String getAccountNumber() { return accountNumber; }
+    public String getOwnerName() { return ownerName; }
+    public String getPhoneNumber() { return phoneNumber; }
+
+    public void setContactDetails(String name, String phone) throws ATMException {
+        if (name == null || name.trim().isEmpty() || name.trim().length() > 80) {
+            throw new ATMException("Enter a name between 1 and 80 characters.");
+        }
+        if (phone == null || !phone.trim().matches("\\+?[0-9]{8,15}")) {
+            throw new ATMException("Phone must contain 8 to 15 digits, optionally starting with +.");
+        }
+        ownerName = name.trim();
+        phoneNumber = phone.trim();
+    }
     public double getBalance() { return balance; }
     public boolean verifyPIN(String pin) { return this.pin.equals(pin); }
     public abstract String getAccountType();
